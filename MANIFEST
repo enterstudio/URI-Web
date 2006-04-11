@@ -19,3 +19,4 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install.pm
 inc/Module/AutoInstall.pm
 lib/URI/Site.pm
+lib/URI/Site/Util.pm
