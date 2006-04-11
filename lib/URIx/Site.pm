@@ -1,11 +1,14 @@
-package URIx::Site;
+package URI::Site;
 
 use warnings;
 use strict;
 
+use Sub::Exporter -setup => {
+};
+
 =head1 NAME
 
-URIx::Site - splam
+URI::Site - splam
 
 =head1 VERSION
 
@@ -17,9 +20,9 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-  package URIx::Site::Mine;
+  package URI::Site::Mine;
 
-  use URIx::Site -base => { ... };
+  use URI::Site -base => { ... };
 
 =head1 METHODS
 
@@ -31,7 +34,7 @@ Hans Dieter Pearcey, C<< <hdp at cpan.org> >>
 
 Please report any bugs or feature requests to
 C<bug-urix-site at rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=URIx-Site>.
+L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=URI-Site>.
 I will be notified, and then you'll automatically be notified of progress on
 your bug as I make changes.
 
@@ -39,7 +42,7 @@ your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc URIx::Site
+    perldoc URI::Site
 
 You can also look for information at:
 
@@ -47,19 +50,19 @@ You can also look for information at:
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/URIx-Site>
+L<http://annocpan.org/dist/URI-Site>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/URIx-Site>
+L<http://cpanratings.perl.org/d/URI-Site>
 
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=URIx-Site>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=URI-Site>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/URIx-Site>
+L<http://search.cpan.org/dist/URI-Site>
 
 =back
 
@@ -74,4 +77,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1; # End of URIx::Site
+1; # End of URI::Site

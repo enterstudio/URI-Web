@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use inc::Module::Install;
 
-name 'URIx-Site';
+name 'URI-Site';
 author 'Hans Dieter Pearcey <hdp@cpan.org>';
 all_from;
 

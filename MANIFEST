@@ -18,4 +18,4 @@ inc/Module/Install/Include.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install.pm
 inc/Module/AutoInstall.pm
-lib/URIx/Site.pm
+lib/URI/Site.pm

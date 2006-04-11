@@ -3,7 +3,7 @@
 use Test::More tests => 1;
 
 BEGIN {
-	use_ok( 'URIx::Site' );
+	use_ok( 'URI::Site' );
 }
 
-diag( "Testing URIx::Site $URIx::Site::VERSION, Perl $], $^X" );
+diag( "Testing URI::Site $URI::Site::VERSION, Perl $], $^X" );

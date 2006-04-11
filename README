@@ -1,4 +1,4 @@
-URIx-Site
+URI-Site
 
 INSTALLATION
 
@@ -14,21 +14,21 @@ SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the perldoc command.
 
-    perldoc URIx::Site
+    perldoc URI::Site
 
 You can also look for information at:
 
     Search CPAN
-        http://search.cpan.org/dist/URIx-Site
+        http://search.cpan.org/dist/URI-Site
 
     CPAN Request Tracker:
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=URIx-Site
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=URI-Site
 
     AnnoCPAN, annotated CPAN documentation:
-        http://annocpan.org/dist/URIx-Site
+        http://annocpan.org/dist/URI-Site
 
     CPAN Ratings:
-        http://cpanratings.perl.org/d/URIx-Site
+        http://cpanratings.perl.org/d/URI-Site
 
 COPYRIGHT AND LICENCE
 
