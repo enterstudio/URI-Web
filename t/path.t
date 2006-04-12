@@ -45,10 +45,9 @@ is($page5, "http://test.com/?page=5", 'root query');
 is($page5->QUERY_PLUS({ color => 'red' }), "http://test.com/?page=5&color=red", 'root query plus');
 
 my $templ = <<'';
-[% root.QUERY(color = 'red') %]
+[%- root.QUERY(color = 'red') -%]
 
 use Template;
 my $out;
 Template->new->process(\$templ, { root => $root }, \$out);
-chomp $out;
 is($out, $root->QUERY({ color => 'red' }), "template");
