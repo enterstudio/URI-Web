@@ -64,7 +64,7 @@ our $VERSION = '0.01';
 =cut
 
 my %DEFAULT = (
-  proto => 'http',
+  scheme => 'http',
 );
 
 sub setup_site {
@@ -75,8 +75,8 @@ sub setup_site {
     $arg->{map}, "$class site map",
   );
 
-  $arg->{proto} ||= $DEFAULT{proto};
-  $arg->{port}  ||= getservbyname($arg->{proto}, 'tcp');
+  $arg->{scheme} ||= $DEFAULT{scheme};
+  $arg->{port}   ||= getservbyname($arg->{scheme}, 'tcp');
 
   $class->_setup_site_map($arg->{map});
 
@@ -126,7 +126,7 @@ sub _setup_site_map {
 sub root {
   my $class = shift;
   return $class->new({
-    (map {; "__$_" => $class->_site->{$_} } qw(proto host port path)),
+    (map {; "__$_" => $class->_site->{$_} } qw(scheme host port path)),
     @_,
   });
 }
@@ -153,7 +153,7 @@ Hans Dieter Pearcey, C<< <hdp at cpan.org> >>
 =head1 BUGS
 
 Please report any bugs or feature requests to
-C<bug-urix-site at rt.cpan.org>, or through the web interface at
+C<bug-uri-site at rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=URI-Site>.
 I will be notified, and then you'll automatically be notified of progress on
 your bug as I make changes.
