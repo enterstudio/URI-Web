@@ -16,4 +16,12 @@ sub _canon_path {
 my $EMPTY = {};
 sub _site { $EMPTY }; 
 
+=head1 NAME
+
+URI::Site::Leaf
+
+=head1 DESCRIPTION
+
+=cut
+
 1;

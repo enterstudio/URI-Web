@@ -177,3 +177,25 @@ sub _canon_path {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+URI::Site::Object
+
+=head1 DESCRIPTION
+
+base class for URI::Site branches and leaves
+
+=head1 METHODS
+
+=head2 WITH
+
+=head2 QUERY
+
+=head2 QUERY_PLUS
+
+=head2 new
+
+=cut
