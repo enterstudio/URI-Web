@@ -3,15 +3,18 @@ package URI::Site;
 use warnings;
 use strict;
 
-use lib '/home/hdp/svk/export/trunk/lib';
-
-use base qw(
+use base qw(URI::Site::Object
             Class::Data::Inheritable
-            Class::Accessor::Class
           );
 
-use URI;
-use NEXT;
+__PACKAGE__->mk_classdata('_site');
+
+use lib '/home/hdp/svk/export/trunk/lib';
+
+use Socket;
+use URI::Site::Leaf;
+use URI::Site::Util qw(_die);
+use Params::Util qw(_ARRAY _CALLABLE _STRING);
 use Data::OptList;
 use Sub::Install ();
 
@@ -27,20 +30,10 @@ sub _build_base {
     push @{$into . "::ISA"}, $class;
   }
 
-  if (ref $value eq 'ARRAY') {
-    $value = { map => $value };
-  }
-
   $into->setup_site($value);
 
   return 1;
 }
-
-__PACKAGE__->mk_classdata('_site_host');
-__PACKAGE__->mk_classdata('_site_port');
-__PACKAGE__->mk_class_accessors(
-  '_site_path', '_site_map',
-);
 
 =head1 NAME
 
@@ -68,92 +61,89 @@ our $VERSION = '0.01';
 
 =head2 setup_site
 
-=head2 setup_site_host
-
-=head2 setup_site_port
-
-=head2 setup_site_path
-
-=head2 setup_site_map
-
 =cut
+
+my %DEFAULT = (
+  proto => 'http',
+);
 
 sub setup_site {
   my ($class, $arg) = @_;
-  for my $key (keys %$arg) {
-    my $meth = "setup_site_$key";
-    $class->$meth($arg->{$key});
-  }
+  $arg = { map => $arg } if _ARRAY($arg);
+
+  $arg->{map} = Data::OptList::expand_opt_list(
+    $arg->{map}, "$class site map",
+  );
+
+  $arg->{proto} ||= $DEFAULT{proto};
+  $arg->{port}  ||= getservbyname($arg->{proto}, 'tcp');
+
+  $class->_setup_site_map($arg->{map});
+
+  $class->_site($arg);
 }
 
-sub setup_site_host { $_[0]->_site_host($_[1]) }
-sub setup_site_port { $_[0]->_site_port($_[1]) }
-sub setup_site_path { $_[0]->_site_path($_[1]) }
-
-sub __obj {
-  ref($_[0]) ? $_[0] : $_[0]->new
-}
-
-sub _host { shift->_site_host }
-sub _port { shift->_site_port }
-
-sub _gather_path {
-  my ($class, $aref) = @_;
-  push @$aref, $class->_site_path;
-}
-
-sub _slash {
-  my ($self, $extra) = @_;
-  return $self->_path . '/' . $extra;
-}
-
-sub _path { 
-  my ($class) = @_;
-  return $class->_site_path if $class->_site_path =~ m!^/!;
-  my @path;
-  $class->EVERY::_gather_path(\@path);
-  return join "", @path;
-}
-
-sub setup_site_map  {
-  my $class = shift;
-  my $map = $class->_site_map($class->_canon_site_map(shift));
-  for my $key (keys %$map) {
-    $class->setup_site_map_entry($key => $map->{$key});
-  }
-}
-
-sub setup_site_map_entry {
-  my ($class, $key, $val) = @_;
-
+sub _setup_site_map {
+  my ($class, $map) = @_;
   my $code;
-  if (not defined $val) {
-    warn "$class map entry: found $key: undef\n";
-    $code = sub { URI->new(shift->__obj->_slash($key)) };
-  } elsif (ref $val eq 'CODE') {
-    warn "$class map entry: found $key: coderef\n";
-    $code = sub { $val->(shift->__obj) };
-  } else {
-    die "unknown map entry: $key => $val";
-  }
+  while (my ($key, $val) = each %$map) {
+    # this is ahead of the main switch because we want
+    # handlers generated here to be treated the same as
+    # handlers that were originally passed in
+    if (_ARRAY($val)) {
+      $val = URI::Site::Util::handler(
+        URI::Site::Util::class({ map => $val }),
+      );
+    }
 
-  Sub::Install::install_sub({
-    into => $class,
-    code => $code,
-    as   => $key,
+    if (not defined $val) {
+      $code = sub { shift->_child(
+        'URI::Site::Leaf', 
+        __path => $key,
+        @_
+      ) };
+    } elsif (_CALLABLE($val)) {
+      $code = sub { $val->({
+        __parent => shift,
+        __path   => $key,
+        __args   => shift,
+      }) };
+    } else {
+      _die "unknown $class site map type: $val";
+    }
+
+    Sub::Install::install_sub({
+      code => $code,
+      as   => $key,
+    });
+  }
+}
+
+=head2 root
+
+=cut
+
+sub root {
+  my $class = shift;
+  return $class->new({
+    (map {; "__$_" => $class->_site->{$_} } qw(proto host port path)),
+    @_,
   });
 }
 
-sub _canon_site_map {
-  my ($class, $map) = @_;
-  $map = Data::OptList::expand_opt_list(
-    $map, "$class site map",
-  );
-  
-  use Data::Dumper;
-  warn Dumper($map);
+sub _child {
+  my $self = shift;
+  my $kidclass = shift;
+  return $kidclass->new({
+    __parent => $self,
+    @_,
+  });
+}
 
-  return $map;
+sub _canon_path {
+  my $path = shift->SUPER::_canon_path(shift);
+  $path = "$path/" if $path and substr($path, -1, 1) ne '/';
+  return $path;
 }
 
 =head1 AUTHOR

@@ -1,9 +1,16 @@
 package URI::Site::Test::Sub;
 
 use URI::Site::Util '-all';
-use URI::Site::Test -base => [
-  qw(sub-base),
-  subber => handler 'Subber',
-];
+use URI::Site -base => {
+  map => [
+    qw(sub-base),
+    subber => [
+      qw(subbest),
+    ],
+  ],
+  path_args => [
+    qw(id),
+  ],
+};
 
 1;

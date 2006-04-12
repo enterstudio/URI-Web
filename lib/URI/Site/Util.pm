@@ -3,9 +3,10 @@ package URI::Site::Util;
 use strict;
 use warnings;
 
+use Package::Generator;
 use Params::Util qw(_STRING _HASH);
 use Sub::Exporter -setup => {
-  exports => [qw(handler class permissive)],
+  exports => [qw(_die _catpath handler class permissive)],
 };
 
 =head1 NAME
@@ -18,20 +19,36 @@ URI::Site::Util
 
 All functions are exportable.
 
-=head2 handler
-
 =cut
+
+my $CLASS = 'URI::Site';
 
 sub _die {
   require Carp::Clan;
-  Carp::Clan->import('croak');
-  croak(@_);
- }
+  Carp::Clan->import("^$CLASS");
+  Carp::Clan::croak(@_);
+}
+
+sub _catpath {
+  my $str = shift;
+  while (@_) {
+    $str .= (substr($str, -1, 1) eq '/' ? '' : '/') . shift;
+  }
+  return $str;
+}
 
 sub _loaded {
   no strict 'refs';
-  return defined %{shift() . '::'};
+#  use Data::Dumper;
+  my $class = shift;
+#  warn "$class :: " . Dumper \%{$class . '::'};
+  return keys %{$class . '::'};
 }
+
+
+=head2 handler
+
+=cut
 
 sub handler ($) {
   my $class = _STRING(shift) || 
@@ -40,17 +57,17 @@ sub handler ($) {
   $class = caller() . "::$class" unless $class =~ s/^\+//;
 
   return sub {
-    my $obj = shift;
     unless (_loaded($class)) {
-      warn "loading $class\n";
+      #warn "loading $class\n";
       eval "require $class";
       die $@ if $@;
+      eval { $class->isa($CLASS) } or _die("$class must be isa $CLASS");
+      die $@ if $@;
     }
-
-    return $class->new({
-      parent => $obj,
-      @_,
-    });
+    
+#    use Data::Dumper;
+#    warn "about to call $class->new with " . Dumper(\@_);
+    return $class->new(@_);
   };
 }
 
@@ -58,22 +75,17 @@ sub handler ($) {
 
 =cut
 
-my $I = 0;
-sub _subclass {
-  my ($base, $prefix) = @_;
-  my $subclass = sprintf("%s::%s_%08x", $base, $prefix, $I++);
-  no strict 'refs';
-  @{$subclass . '::ISA'} = $base;
-  return $subclass;
-}
-
 sub class ($) {
   my $site = _HASH(shift) || _die "argument to class() must be hashref";
   my $caller = _STRING(shift) || caller;
 
-  my $class = _subclass($caller, 'site');
+  my $class = Package::Generator->new_package({
+    base => $caller,
+    isa  => $CLASS,
+  });
+
   $class->setup_site($site);
-  return $class;
+  return "+$class";
 }
 
 =head2 permissive
