@@ -7,6 +7,7 @@ use base qw(Class::Accessor::Fast
             Class::Data::Inheritable
           );
 
+use Socket;
 use URI::Site::Util qw(_die _catpath);
 use Params::Util qw(_ARRAY);
 use Sub::Install ();
@@ -32,20 +33,41 @@ use overload (
 );
 
 BEGIN {
-  for my $meth (qw(scheme host port)) {
-    my $private = "__$meth";
-    my $public  = uc($meth);
+  for my $meth (qw(scheme host)) {
     Sub::Install::install_sub({
-      as   => $public,
+      as   => uc($meth),
       code => sub {
-        my $self = shift;
-        my $val = $self->$private(@_);
-        return $val if defined $val;
-        return unless $self->__parent;
-        return $self->__parent->$public(@_);
+        my ($self, $opt) = @_;
+        return $self->_lookup($meth, $opt);
       },
     });
   }
+}
+
+sub PORT {
+  my ($self, $opt) = @_;
+  my $str = $self->PATH;
+  $opt ||= {};
+  if ($self->__scheme and not $opt->{no_default_port}) {
+    #warn "$str: (possibly) looking up parental port, no default\n";
+    return $self->_lookup('port', { %$opt, no_default_port => 1 })
+      || scalar getservbyname($self->SCHEME, 'tcp');
+  }
+  #warn "$str: looking up parental port, possibly with default allowed\n";
+  return $self->_lookup('port', $opt);
+}
+
+sub _lookup {
+  my ($self, $name, $opt) = @_;
+  my $public  = uc($name);
+  my $private = "__$name";
+
+  $opt ||= {};
+  return $self->_env($public) if !$opt->{clean} && $self->_env($public);
+  my $val = $self->$private;
+  return $val if defined $val;
+  return unless $self->__parent;
+  return $self->__parent->$public($opt);
 }
 
 # backwards compat
@@ -62,35 +84,53 @@ sub new {
 }
 
 sub _env {
-  my ($self, $path) = @_;
+  my ($self, $name) = @_;
   my $var = sprintf(
-    "SITE_%s_%s_PATH",
-    $self->HOST, $path,
+    "SITE_%s_%s_%s",
+    $self->_clean_host, $self->_clean_path, $name,
   );
-  $var =~ tr/./_/;
+  $var =~ tr{./}{__};
+  $var =~ s/_+/_/g;
+  
+  #warn "looking for \$ENV{$var}\n";
   return $ENV{$var};
 }
 
+sub _clean_path {
+  my $self = shift;
+  $self->{_clean_path} ||= $self->PATH({ clean => 1 });
+}
+
+sub _clean_host {
+  my $self = shift;
+  $self->{_clean_host} ||= $self->HOST({ clean => 1 });
+}
+
 sub PATH {
-  my ($self, $arg) = @_;
-  $arg ||= {};
+  my ($self, $opt) = @_;
+  $opt ||= {};
   
   my $path = $self->__path;
   my $ppath;
-  
+
+  # XXX this is all pretty ugly  
   if ($path && $path =~ m!^/! or !$self->__parent) {
-    $ppath = {};
+    $ppath = {
+      clean => "",
+      env   => "",
+    };
   } else {
     $ppath = {
-      no_env => $self->__parent->PATH({ %$arg, no_env => 1 }),
-      env    => $self->__parent->PATH($arg),
+      clean => $self->__parent->PATH({ %$opt, clean => 1 }),
+      env   => $self->__parent->PATH($opt),
     };
   }
-  warn "choosing between " . $self->_env($path) . " and $path\n";
-  $path = $arg->{no_env} ? $path : $self->_env($path) || $path;
+
+  $path = $opt->{clean} ? $path : $self->_env('PATH') || $path;
+  $path = _catpath($ppath->{$opt->{clean} ? 'clean' : 'env'}, $path);
 
   my $args = $self->__args;
-  if (%$args) {
+  if (!$opt->{clean} && %$args) {
     my $path_args = $self->__path_args;
     
     for my $name (keys %$path_args) {
@@ -127,22 +167,33 @@ sub URI {
   return $uri->canonical;
 }
 
+sub _clone { Storable::dclone(shift) }
+
 sub WITH {
   my ($self, $arg) = @_;
+  #warn "getting path_args for " . overload::StrVal($self);
   my $pa = $self->__path_args;
 
   my $clone;
 
   if (my $query = delete $arg->{__query}) {
-    $clone = Storable::dclone($self);
+    $clone = $self->_clone;
     $clone->__query($query);
   }
 
   for my $key (keys %$arg) {
     next unless exists $pa->{$key};
     my $val = delete $arg->{$key};
-    $clone ||= Storable::dclone($self);
+    $clone ||= $self->_clone;
     $clone->__args->{$key} = $val;
+  }
+
+  for my $key (qw(SCHEME HOST PORT)) {
+    my $val = delete $arg->{$key};
+    next unless defined $val;
+    $clone ||= $self->_clone;
+    my $private = '__' . lc($key);
+    $clone->{$private} = $val;
   }
 
   if (%$arg) {
@@ -150,7 +201,7 @@ sub WITH {
       require Data::Dumper;
       _die "WITH: args remaining and no parent: " . Data::Dumper::Dumper($arg);
     }
-    $clone ||= Storable::dclone($self);
+    $clone ||= $self->_clone;
     $clone->__parent($self->__parent->WITH($arg));
   }
 

@@ -76,7 +76,7 @@ sub setup_site {
   );
 
   $arg->{scheme} ||= $DEFAULT{scheme};
-  $arg->{port}   ||= getservbyname($arg->{scheme}, 'tcp');
+#  $arg->{port}   ||= getservbyname($arg->{scheme}, 'tcp');
 
   $class->_setup_site_map($arg->{map});
 

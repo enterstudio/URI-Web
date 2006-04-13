@@ -44,6 +44,12 @@ my $page5 = $root->QUERY({ page => 5 });
 is($page5, "http://test.com/?page=5", 'root query');
 is($page5->QUERY_PLUS({ color => 'red' }), "http://test.com/?page=5&color=red", 'root query plus');
 
+is($root->WITH({ PORT => 8080 }), "http://test.com:8080/", "WITH PORT");
+is($sub->WITH({ HOST => 'try.com' }), "http://try.com/sub/17/", "WITH HOST");
+is($sub->WITH({ SCHEME => 'https' }), "https://test.com/sub/17/", "WITH SCHEME (branch)");
+is($subbest->WITH({ SCHEME => 'https' }),
+   "https://test.com/sub/17/subber/subbest", "WITH SCHEME (leaf)");
+
 my $templ = <<'';
 [%- root.QUERY(color = 'red') -%]
 
