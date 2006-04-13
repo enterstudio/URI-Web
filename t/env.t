@@ -11,19 +11,19 @@ my $root = URI::Web::Test->ROOT;
 
 my $subber = $root->sub->subber;
 
-$ENV{SITE_test_com_sub_subber_PATH} = 'mayo';
+$ENV{SITE_subtest_com_sub_subber_PATH} = 'mayo';
 
-is("$subber", "http://test.com/sub/mayo/");
-is($subber->WITH({ id => 7 }), "http://test.com/sub/7/mayo/");
+is("$subber", "http://subtest.com/sub/mayo/");
+is($subber->WITH({ id => 7 }), "http://subtest.com/sub/7/mayo/");
 
-$ENV{SITE_test_com_sub_PATH} = 'hoagie';
+$ENV{SITE_subtest_com_sub_PATH} = 'hoagie';
 
 my $sub = $root->sub;
 
-is("$sub", "http://test.com/hoagie/");
-is("$subber", "http://test.com/hoagie/mayo/");
+is("$sub", "http://subtest.com/hoagie/");
+is("$subber", "http://subtest.com/hoagie/mayo/");
 
-$ENV{SITE_test_com_sub_HOST} = 'try.com';
+$ENV{SITE_subtest_com_sub_HOST} = 'try.com';
 $sub = $sub->WITH({ id => 5 });
 $subber = $sub->subber;
 

@@ -17,28 +17,28 @@ is("$root", 'http://test.com/', 'root uri');
 
 my $sub = $root->sub;
 isa_ok($sub, 'URI::Web');
-is("$sub", "http://test.com/sub/", "sub uri (no args)");
+is("$sub", "http://subtest.com/sub/", "sub uri (no args)");
 
 $sub = $root->sub({ id => 17 });
-is("$sub", "http://test.com/sub/17/", "sub uri (args)");
+is("$sub", "http://subtest.com/sub/17/", "sub uri (args)");
 
 my $subber = $sub->subber;
-is("$subber", "http://test.com/sub/17/subber/", "subber uri");
+is("$subber", "http://subtest.com/sub/17/subber/", "subber uri");
 
 my $subbest = $sub->subber->subbest;
 isa_ok($subbest, 'URI::Web::Leaf');
-is("$subbest", 'http://test.com/sub/17/subber/subbest', "subbest leaf");
+is("$subbest", 'http://subtest.com/sub/17/subber/subbest', "subbest leaf");
 
-is($sub->WITH({ id => 2 }), "http://test.com/sub/2/", "sub uri (with)");
-is($sub, "http://test.com/sub/17/", "sub uri (unchanged)");
+is($sub->WITH({ id => 2 }), "http://subtest.com/sub/2/", "sub uri (with)");
+is($sub, "http://subtest.com/sub/17/", "sub uri (unchanged)");
 
-is($subber->WITH({ id => 2 }),  "http://test.com/sub/2/subber/",
+is($subber->WITH({ id => 2 }),  "http://subtest.com/sub/2/subber/",
    "subber uri (with)");
-is($subber, 'http://test.com/sub/17/subber/', "subber (unchanged)");
+is($subber, 'http://subtest.com/sub/17/subber/', "subber (unchanged)");
 
-is($subbest->WITH({ id => 3 }), "http://test.com/sub/3/subber/subbest",
+is($subbest->WITH({ id => 3 }), "http://subtest.com/sub/3/subber/subbest",
    "subbest uri (with)");
-is($subbest, 'http://test.com/sub/17/subber/subbest', 'subbest (unchanged)');
+is($subbest, 'http://subtest.com/sub/17/subber/subbest', 'subbest (unchanged)');
 
 my $page5 = $root->QUERY({ page => 5 });
 is($page5, "http://test.com/?page=5", 'root query');
@@ -46,9 +46,9 @@ is($page5->QUERY_PLUS({ color => 'red' }), "http://test.com/?page=5&color=red", 
 
 is($root->WITH({ PORT => 8080 }), "http://test.com:8080/", "WITH PORT");
 is($sub->WITH({ HOST => 'try.com' }), "http://try.com/sub/17/", "WITH HOST");
-is($sub->WITH({ SCHEME => 'https' }), "https://test.com/sub/17/", "WITH SCHEME (branch)");
+is($sub->WITH({ SCHEME => 'https' }), "https://subtest.com/sub/17/", "WITH SCHEME (branch)");
 is($subbest->WITH({ SCHEME => 'https' }),
-   "https://test.com/sub/17/subber/subbest", "WITH SCHEME (leaf)");
+   "https://subtest.com/sub/17/subber/subbest", "WITH SCHEME (leaf)");
 
 my $templ = <<'';
 [%- root.QUERY(color = 'red') -%]

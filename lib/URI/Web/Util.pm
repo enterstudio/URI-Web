@@ -70,7 +70,10 @@ sub handler ($) {
     
 #    use Data::Dumper;
 #    warn "about to call $class->new with " . Dumper(\@_);
-    return $class->new(@_);
+    return $class->new({
+      (map {; "__$_" => $class->_site->{$_} } qw(scheme host port)),
+      %{+shift},
+    });
   };
 }
 

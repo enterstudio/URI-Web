@@ -25,8 +25,8 @@ is("$easiest", "http://test.com/easiest/");
 is($easiest->of->all, "http://test.com/easiest/of/all/");
 
 my $easysub = $root->sub->easy;
-is("$easysub", "http://test.com/sub/easy/", "easy sub of handler");
+is("$easysub", "http://subtest.com/sub/easy/", "easy sub of handler");
 
 my $deep = $easysub->just->add->water;
-is($deep, "http://test.com/sub/easy/just/add/water/", "deep");
-is($deep->WITH({ id => 5 }), "http://test.com/sub/5/easy/just/add/water/", "deep with arg");
+is($deep, "http://subtest.com/sub/easy/just/add/water/", "deep");
+is($deep->WITH({ id => 5 }), "http://subtest.com/sub/5/easy/just/add/water/", "deep with arg");

@@ -2,16 +2,15 @@ package URI::Web::Test::Sub;
 
 use URI::Web::Util '-all';
 use URI::Web -base => {
-  map => [
+  host => 'subtest.com',
+  map  => [
     qw(sub-base),
     subber => [
       qw(subbest),
     ],
     easy => permissive,
   ],
-  path_args => [
-    qw(id),
-  ],
+  path_args => [ 'id' ],
 };
 
 1;
