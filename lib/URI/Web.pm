@@ -119,11 +119,11 @@ sub _setup_site_map {
   }
 }
 
-=head2 root
+=head2 ROOT
 
 =cut
 
-sub root {
+sub ROOT {
   my $class = shift;
   return $class->new({
     (map {; "__$_" => $class->_site->{$_} } qw(scheme host port path)),

@@ -8,7 +8,7 @@ use lib 't/lib';
 use Test::More 'no_plan';
 use ok 'URI::Web::Test';
 
-my $root = URI::Web::Test->root;
+my $root = URI::Web::Test->ROOT;
 
 isa_ok($root, 'URI::Web::Test');
 isa_ok($root, 'URI::Web');
