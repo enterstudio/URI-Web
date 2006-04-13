@@ -97,15 +97,7 @@ sub class ($) {
 
 sub permissive () {
   # deliberately avoid prototype
-  my $class = &class({ permissive => 1 }, scalar caller);
-  eval sprintf <<'', $class;
-package %s;
-require URI::Web::Permissive;
-URI::Web::Permissive->import('-mixin');
-
-  die $@ if $@;
-
-  return handler $class;
+  return handler &class({ permissive => 1 }, scalar caller);
 }
 
 1;

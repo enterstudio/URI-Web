@@ -6,7 +6,10 @@ use URI::Web -base => {
   path  => '',
   map   => [
     qw(base),
-    sub => handler 'Sub',
+    sub     => handler 'Sub',
+    easy    => handler 'Easy',
+    easier  => handler class { permissive => 1 },
+    easiest => permissive,
   ],
 };
 

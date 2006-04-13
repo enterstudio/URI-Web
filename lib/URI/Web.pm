@@ -76,9 +76,17 @@ sub setup_site {
   );
 
   $arg->{scheme} ||= $DEFAULT{scheme};
-#  $arg->{port}   ||= getservbyname($arg->{scheme}, 'tcp');
 
   $class->_setup_site_map($arg->{map});
+
+  if ($arg->{permissive}) {
+    eval sprintf <<'', $class;
+package %s;
+require URI::Web::Permissive;
+URI::Web::Permissive->import('-mixin');
+
+    die $@ if $@;
+  }
 
   $class->_site($arg);
 }
@@ -113,6 +121,7 @@ sub _setup_site_map {
     }
 
     Sub::Install::install_sub({
+      into => $class,
       code => $code,
       as   => $key,
     });

@@ -15,10 +15,10 @@ use Storable ();
 
 BEGIN {
   __PACKAGE__->mk_accessors(
-    qw(__parent __query),
+    qw(__parent __path __query),
   );
   __PACKAGE__->mk_ro_accessors(
-    qw(__scheme __host __port __path __args),
+    qw(__scheme __host __port __args),
   );
   __PACKAGE__->mk_classdata(
     qw(__path_args_optlist),

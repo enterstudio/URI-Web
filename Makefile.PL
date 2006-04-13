@@ -12,6 +12,7 @@ build_requires 'Test::use::ok' => 0;
 requires 'Class::Data::Inheritable' => 0;
 requires 'Class::Accessor::Class'   => 0;
 requires 'Params::Util'             => 0;
+requires 'Package::Generator'       => 0;
 requires 'Sub::Exporter'            => 0;
 requires 'URI'                      => 0;
 

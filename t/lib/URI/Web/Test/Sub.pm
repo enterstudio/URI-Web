@@ -7,6 +7,7 @@ use URI::Web -base => {
     subber => [
       qw(subbest),
     ],
+    easy => permissive,
   ],
   path_args => [
     qw(id),
