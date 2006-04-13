@@ -143,7 +143,7 @@ sub PATH {
   return $path;
 }
 
-sub __path_args { 
+sub __path_args {
   my $class = shift;
   return {} unless $class->_site->{path_args};
   $class->__path_args_optlist || $class->__path_args_optlist(
