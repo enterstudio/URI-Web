@@ -36,6 +36,7 @@ BEGIN {
     my $private = "__$meth";
     my $public  = uc($meth);
     Sub::Install::install_sub({
+      as   => $public,
       code => sub {
         my $self = shift;
         my $val = $self->$private(@_);
@@ -43,7 +44,6 @@ BEGIN {
         return unless $self->__parent;
         return $self->__parent->$public(@_);
       },
-      as   => $public,
     });
   }
 }
@@ -61,15 +61,33 @@ sub new {
   return $self;
 }
 
-sub PATH {
-  my ($self) = @_;
-  my $path;
+sub _env {
+  my ($self, $path) = @_;
+  my $var = sprintf(
+    "SITE_%s_%s_PATH",
+    $self->HOST, $path,
+  );
+  $var =~ tr/./_/;
+  return $ENV{$var};
+}
 
-  if ($self->__path && $self->__path =~ m!^/! or !$self->__parent) {
-    $path = $self->__path;
+sub PATH {
+  my ($self, $arg) = @_;
+  $arg ||= {};
+  
+  my $path = $self->__path;
+  my $ppath;
+  
+  if ($path && $path =~ m!^/! or !$self->__parent) {
+    $ppath = {};
   } else {
-    $path = _catpath($self->__parent->PATH, $self->__path);
+    $ppath = {
+      no_env => $self->__parent->PATH({ %$arg, no_env => 1 }),
+      env    => $self->__parent->PATH($arg),
+    };
   }
+  warn "choosing between " . $self->_env($path) . " and $path\n";
+  $path = $arg->{no_env} ? $path : $self->_env($path) || $path;
 
   my $args = $self->__args;
   if (%$args) {
