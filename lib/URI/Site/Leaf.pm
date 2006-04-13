@@ -3,7 +3,7 @@ package URI::Site::Leaf;
 use strict;
 use warnings;
 
-use base qw(URI::Site::Object);
+use base qw(URI::Site::Node);
 
 sub _canon_path {
   my $path = shift->SUPER::_canon_path(shift);

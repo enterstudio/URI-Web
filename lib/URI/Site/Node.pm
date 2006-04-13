@@ -1,4 +1,4 @@
-package URI::Site::Object;
+package URI::Site::Node;
 
 use strict;
 use warnings;
@@ -182,7 +182,7 @@ __END__
 
 =head1 NAME
 
-URI::Site::Object
+URI::Site::Node
 
 =head1 DESCRIPTION
 
@@ -213,7 +213,7 @@ scheme.
 
 =head2 URI
 
-Return a URI object.  Since URI::Site::Objects stringify to
+Return a URI object.  Since URI::Site::Nodes stringify to
 this method, you will only rarely need to call it.
 
 =cut

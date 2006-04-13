@@ -3,7 +3,7 @@ package URI::Site;
 use warnings;
 use strict;
 
-use base qw(URI::Site::Object
+use base qw(URI::Site::Node
             Class::Data::Inheritable
           );
 

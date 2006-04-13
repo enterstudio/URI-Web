@@ -12,7 +12,7 @@ my $root = URI::Site::Test->root;
 
 isa_ok($root, 'URI::Site::Test');
 isa_ok($root, 'URI::Site');
-isa_ok($root, 'URI::Site::Object');
+isa_ok($root, 'URI::Site::Node');
 is("$root", 'http://test.com/', 'root uri');
 
 my $sub = $root->sub;
