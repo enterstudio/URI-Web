@@ -7,8 +7,10 @@ t/00-load.t
 t/boilerplate.t
 t/pod-coverage.t
 t/pod.t
-t/lib/URI/Site/Test/Sub.pm
-t/lib/URI/Site/Test.pm
+t/env.t
+t/path.t
+t/lib/URI/Web/Test/Sub.pm
+t/lib/URI/Web/Test.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Win32.pm
@@ -20,7 +22,7 @@ inc/Module/Install/Include.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install.pm
 inc/Module/AutoInstall.pm
-lib/URI/Site.pm
-lib/URI/Site/Util.pm
-lib/URI/Site/Node.pm
-lib/URI/Site/Leaf.pm
+lib/URI/Web.pm
+lib/URI/Web/Util.pm
+lib/URI/Web/Node.pm
+lib/URI/Web/Leaf.pm
