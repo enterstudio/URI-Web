@@ -31,7 +31,7 @@ sub _die {
 
 sub _catpath {
   my $str = shift;
-  return '' unless defined $str;
+  return '' unless defined $str || @_;
   while (@_) {
     my $next = shift;
     $next = '' unless defined $next;
