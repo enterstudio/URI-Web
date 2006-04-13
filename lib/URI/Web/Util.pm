@@ -33,7 +33,9 @@ sub _catpath {
   my $str = shift;
   return '' unless defined $str;
   while (@_) {
-    $str .= (substr($str, -1, 1) eq '/' ? '' : '/') . shift;
+    my $next = shift;
+    $next = '' unless defined $next;
+    $str .= (substr($str, -1, 1) eq '/' ? '' : '/') . $next;
   }
   return $str;
 }
