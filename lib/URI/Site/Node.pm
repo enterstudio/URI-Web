@@ -46,7 +46,7 @@ BEGIN {
 
 sub PORT {
   my ($self, $opt) = @_;
-  my $str = $self->PATH;
+  #my $str = $self->PATH;
   $opt ||= {};
   if ($self->__scheme and not $opt->{no_default_port}) {
     #warn "$str: (possibly) looking up parental port, no default\n";
