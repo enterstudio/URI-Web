@@ -1,4 +1,4 @@
-package URI::Site::Node;
+package URI::Web::Node;
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use base qw(Class::Accessor::Fast
           );
 
 use Socket;
-use URI::Site::Util qw(_die _catpath);
+use URI::Web::Util qw(_die _catpath);
 use Params::Util qw(_ARRAY);
 use Sub::Install ();
 use Storable ();
@@ -233,11 +233,11 @@ __END__
 
 =head1 NAME
 
-URI::Site::Node
+URI::Web::Node
 
 =head1 DESCRIPTION
 
-base class for URI::Site branches and leaves
+base class for URI::Web branches and leaves
 
 =head1 METHODS
 
@@ -264,7 +264,7 @@ scheme.
 
 =head2 URI
 
-Return a URI object.  Since URI::Site::Nodes stringify to
+Return a URI object.  Since URI::Web::Nodes stringify to
 this method, you will only rarely need to call it.
 
 =cut

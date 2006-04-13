@@ -1,4 +1,4 @@
-URI-Site
+URI-Web
 
 INSTALLATION
 
@@ -14,21 +14,21 @@ SUPPORT AND DOCUMENTATION
 
 After installing, you can find documentation for this module with the perldoc command.
 
-    perldoc URI::Site
+    perldoc URI::Web
 
 You can also look for information at:
 
     Search CPAN
-        http://search.cpan.org/dist/URI-Site
+        http://search.cpan.org/dist/URI-Web
 
     CPAN Request Tracker:
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=URI-Site
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=URI-Web
 
     AnnoCPAN, annotated CPAN documentation:
-        http://annocpan.org/dist/URI-Site
+        http://annocpan.org/dist/URI-Web
 
     CPAN Ratings:
-        http://cpanratings.perl.org/d/URI-Site
+        http://cpanratings.perl.org/d/URI-Web
 
 COPYRIGHT AND LICENCE
 

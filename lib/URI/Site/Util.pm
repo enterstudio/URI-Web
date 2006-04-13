@@ -1,4 +1,4 @@
-package URI::Site::Util;
+package URI::Web::Util;
 
 use strict;
 use warnings;
@@ -11,7 +11,7 @@ use Sub::Exporter -setup => {
 
 =head1 NAME
 
-URI::Site::Util
+URI::Web::Util
 
 =head1 DESCRIPTION
 
@@ -21,7 +21,7 @@ All functions are exportable.
 
 =cut
 
-my $CLASS = 'URI::Site';
+my $CLASS = 'URI::Web';
 
 sub _die {
   require Carp::Clan;
@@ -97,8 +97,8 @@ sub permissive () {
   my $class = &class({ permissive => 1 }, scalar caller);
   eval sprintf <<'', $class;
 package %s;
-require URI::Site::Permissive;
-URI::Site::Permissive->import('-mixin');
+require URI::Web::Permissive;
+URI::Web::Permissive->import('-mixin');
 
   die $@ if $@;
 

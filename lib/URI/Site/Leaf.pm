@@ -1,9 +1,9 @@
-package URI::Site::Leaf;
+package URI::Web::Leaf;
 
 use strict;
 use warnings;
 
-use base qw(URI::Site::Node);
+use base qw(URI::Web::Node);
 
 sub _canon_path {
   my $path = shift->SUPER::_canon_path(shift);
@@ -18,7 +18,7 @@ sub _site { $EMPTY };
 
 =head1 NAME
 
-URI::Site::Leaf
+URI::Web::Leaf
 
 =head1 DESCRIPTION
 

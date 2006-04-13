@@ -1,7 +1,7 @@
-package URI::Site::Test::Sub;
+package URI::Web::Test::Sub;
 
-use URI::Site::Util '-all';
-use URI::Site -base => {
+use URI::Web::Util '-all';
+use URI::Web -base => {
   map => [
     qw(sub-base),
     subber => [

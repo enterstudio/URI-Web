@@ -1,7 +1,7 @@
-package URI::Site::Test;
+package URI::Web::Test;
 
-use URI::Site::Util '-all';
-use URI::Site -base => {
+use URI::Web::Util '-all';
+use URI::Web -base => {
   host  => 'test.com',
   path  => '',
   map   => [

@@ -5,9 +5,9 @@ use warnings;
 
 use lib 't/lib';
 use Test::More 'no_plan';
-use ok 'URI::Site::Test';
+use ok 'URI::Web::Test';
 
-my $root = URI::Site::Test->root;
+my $root = URI::Web::Test->root;
 
 my $subber = $root->sub->subber;
 

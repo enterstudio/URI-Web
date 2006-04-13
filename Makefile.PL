@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use inc::Module::Install;
 
-name 'URI-Site';
+name 'URI-Web';
 author 'Hans Dieter Pearcey <hdp@cpan.org>';
 all_from;
 

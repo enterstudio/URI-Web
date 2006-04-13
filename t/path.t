@@ -6,17 +6,17 @@ use warnings;
 use lib 't/lib';
 
 use Test::More 'no_plan';
-use ok 'URI::Site::Test';
+use ok 'URI::Web::Test';
 
-my $root = URI::Site::Test->root;
+my $root = URI::Web::Test->root;
 
-isa_ok($root, 'URI::Site::Test');
-isa_ok($root, 'URI::Site');
-isa_ok($root, 'URI::Site::Node');
+isa_ok($root, 'URI::Web::Test');
+isa_ok($root, 'URI::Web');
+isa_ok($root, 'URI::Web::Node');
 is("$root", 'http://test.com/', 'root uri');
 
 my $sub = $root->sub;
-isa_ok($sub, 'URI::Site');
+isa_ok($sub, 'URI::Web');
 is("$sub", "http://test.com/sub/", "sub uri (no args)");
 
 $sub = $root->sub({ id => 17 });
@@ -26,7 +26,7 @@ my $subber = $sub->subber;
 is("$subber", "http://test.com/sub/17/subber/", "subber uri");
 
 my $subbest = $sub->subber->subbest;
-isa_ok($subbest, 'URI::Site::Leaf');
+isa_ok($subbest, 'URI::Web::Leaf');
 is("$subbest", 'http://test.com/sub/17/subber/subbest', "subbest leaf");
 
 is($sub->WITH({ id => 2 }), "http://test.com/sub/2/", "sub uri (with)");
