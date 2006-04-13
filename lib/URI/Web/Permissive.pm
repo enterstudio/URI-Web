@@ -23,4 +23,20 @@ sub AUTOLOAD {
   return $clone;
 }
 
+=head1 NAME
+
+URI::Web::Permissive
+
+=head1 DESCRIPTION
+
+URI::Web::Permissive provides an AUTOLOAD method to classes
+that import it.  This method allows generation of any url
+underneath the URI::Web object's namespace.
+
+=head1 METHODS
+
+=head2 AUTOLOAD
+
+=cut
+
 1;

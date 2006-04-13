@@ -12,13 +12,14 @@ use URI::Web::Util qw(_die _catpath);
 use Params::Util qw(_ARRAY);
 use Sub::Install ();
 use Storable ();
+use Scalar::Util ();
 
 BEGIN {
   __PACKAGE__->mk_accessors(
-    qw(__parent __path __query),
+    qw(__parent __path __args __query),
   );
   __PACKAGE__->mk_ro_accessors(
-    qw(__scheme __host __port __args),
+    qw(__scheme __host __port),
   );
   __PACKAGE__->mk_classdata(
     qw(__path_args_optlist),
@@ -32,16 +33,14 @@ use overload (
   fallback => 1,
 );
 
-BEGIN {
-  for my $meth (qw(scheme host)) {
-    Sub::Install::install_sub({
-      as   => uc($meth),
-      code => sub {
-        my ($self, $opt) = @_;
-        return $self->_lookup($meth, $opt);
-      },
-    });
-  }
+sub SCHEME {
+  my ($self, $opt) = @_;
+  return $self->_lookup('scheme', $opt);
+}
+
+sub HOST {
+  my ($self, $opt) = @_;
+  return $self->_lookup('host', $opt);
 }
 
 sub PORT {
@@ -51,10 +50,10 @@ sub PORT {
   if ($self->__scheme and not $opt->{no_default_port}) {
     #warn "$str: (possibly) looking up parental port, no default\n";
     return $self->_lookup('port', { %$opt, no_default_port => 1 })
-      || scalar getservbyname($self->SCHEME, 'tcp');
+      || scalar getservbyname($self->__scheme, 'tcp');
   }
   #warn "$str: looking up parental port, possibly with default allowed\n";
-  return $self->_lookup('port', $opt);
+  return $self->_lookup('port', $opt) || scalar getservbyname($self->SCHEME, 'tcp'); 
 }
 
 sub _lookup {
@@ -63,13 +62,42 @@ sub _lookup {
   my $private = "__$name";
 
   $opt ||= {};
-  return $self->_env($public) if !$opt->{clean} && $self->_env($public);
-  my $val = $self->$private;
-  return $val if defined $val;
-  return unless $self->__parent;
-  return $self->__parent->$public($opt);
+  
+  my @q = $self;
+  while (@q) { 
+    my $obj = shift @q;
+    #warn "checking $public on " . overload::StrVal($obj) . "\n";
+    if (!$opt->{canonical}) {
+      return $obj->_env($public) if defined $obj->_env($public);
+    }
+
+    my $val = $obj->$private;
+    return $val if defined $val;
+    
+    push @q, grep { defined } $obj->__parent;
+  }
 }
 
+sub _gather_path {
+  my ($self, $opt) = @_;
+  # 'stop' gets current path segment
+  $opt->{stop}    ||= sub { substr(shift, 0, 1) eq '/' };
+  # 'segment' gets object
+  $opt->{segment} ||= sub { shift->__path };
+
+  my $path = '';
+  my @q = $self;
+
+  while (@q) {
+    my $obj = shift @q;
+    my $segment = $opt->{segment}->($obj);
+    $path = _catpath($segment, $path);
+    return $path if !$obj->__parent || $opt->{stop}->($segment);
+    push @q, $obj->__parent;
+  }
+  return '';
+}
+  
 # backwards compat
 sub _but_with  { shift->WITH(@_) }
 
@@ -80,6 +108,9 @@ sub new {
   $self->{__args}  ||= {};
   $self->{__query} ||= {};
 
+  # canonicalize
+  $self->_args($self->__args);
+
   return $self;
 }
 
@@ -87,7 +118,7 @@ sub _env {
   my ($self, $name) = @_;
   my $var = sprintf(
     "SITE_%s_%s_%s",
-    $self->_clean_host, $self->_clean_path, $name,
+    $self->_canonical_host, $self->_canonical_path, $name,
   );
   $var =~ tr{./}{__};
   $var =~ s/_+/_/g;
@@ -96,52 +127,51 @@ sub _env {
   return $ENV{$var};
 }
 
-sub _clean_path {
+sub _canonical_path {
   my $self = shift;
-  $self->{_clean_path} ||= $self->PATH({ clean => 1 });
+  $self->{_canonical_path} ||= $self->_gather_path;
 }
 
-sub _clean_host {
+sub _canonical_host {
   my $self = shift;
-  $self->{_clean_host} ||= $self->HOST({ clean => 1 });
+  $self->{_canonical_host} ||= $self->HOST({ canonical => 1 });
 }
 
 sub PATH {
   my ($self, $opt) = @_;
   $opt ||= {};
-  
-  my $path = $self->__path;
-  my $ppath;
 
-  # XXX this is all pretty ugly  
-  if ($path && $path =~ m!^/! or !$self->__parent) {
-    $ppath = {
-      clean => "",
-      env   => "",
-    };
-  } else {
-    $ppath = {
-      clean => $self->__parent->PATH({ %$opt, clean => 1 }),
-      env   => $self->__parent->PATH($opt),
-    };
-  }
-
-  $path = $opt->{clean} ? $path : $self->_env('PATH') || $path;
-  $path = _catpath($ppath->{$opt->{clean} ? 'clean' : 'env'}, $path);
-
-  my $args = $self->__args;
-  if (!$opt->{clean} && %$args) {
-    my $path_args = $self->__path_args;
-    
-    for my $name (keys %$path_args) {
-      my $code = $path_args->{$name} || sub { shift };
-      next unless defined $args->{$name};
-      $path = _catpath($path, $code->($args->{$name}));
-    }
-  }
-
-  return $path;
+  return $self->_gather_path({
+    segment => sub {
+      my $obj = shift;
+      my $pa   = $obj->__path_args;
+      my $args = $obj->_args;
+      # XXX check env here:
+      my @path = $obj->_env('PATH') || $obj->__path;
+      for my $argname (keys %$args) {
+        next unless exists $pa->{$argname};
+        my $code = $pa->{$argname} || sub { 
+          defined($_[0]) ? $_[0] : ''
+        };
+        push @path, $code->($args->{$argname});
+      }
+      return @path ? _catpath(@path) : '';
+    },
+  });
 }
+
+sub _args {
+  my $self = shift;
+  if (@_) {
+    my $args = shift;
+    my $pa   = $self->__path_args;
+    if (Scalar::Util::blessed($args) || !ref($args) and keys %$pa == 1) {
+      $args = { keys %$pa => $args };
+    }
+    $self->__args($args);
+  }
+  return $self->__args;
+}    
 
 sub __path_args {
   my $class = shift;

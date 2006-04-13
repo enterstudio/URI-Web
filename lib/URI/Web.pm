@@ -82,8 +82,8 @@ sub setup_site {
   if ($arg->{permissive}) {
     eval sprintf <<'', $class;
 package %s;
-require URI::Web::Permissive;
-URI::Web::Permissive->import('-mixin');
+use URI::Web::Permissive;
+URI::Web::Permissive->import('-all');
 
     die $@ if $@;
   }
