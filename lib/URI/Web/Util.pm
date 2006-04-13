@@ -30,11 +30,10 @@ sub _die {
 }
 
 sub _catpath {
-  my $str = shift;
-  return '' unless defined $str || @_;
-  while (@_) {
-    my $next = shift;
-    $next = '' unless defined $next;
+  my @path = grep { defined } @_;
+  my $str = shift @path;
+  while (@path) {
+    my $next = shift @path;
     $str .= (substr($str, -1, 1) eq '/' ? '' : '/') . $next;
   }
   return $str;
