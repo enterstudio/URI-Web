@@ -9,8 +9,6 @@ use base qw(URI::Web::Node
 
 __PACKAGE__->mk_classdata('_site');
 
-use lib '/home/hdp/svk/export/trunk/lib';
-
 use Socket;
 use URI;
 use URI::Web::Leaf;
