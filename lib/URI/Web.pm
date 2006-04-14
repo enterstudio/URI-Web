@@ -12,6 +12,7 @@ __PACKAGE__->mk_classdata('_site');
 use lib '/home/hdp/svk/export/trunk/lib';
 
 use Socket;
+use URI;
 use URI::Web::Leaf;
 use URI::Web::Util qw(_die);
 use Params::Util qw(_ARRAY _CALLABLE _STRING);
@@ -147,6 +148,53 @@ sub _canon_path {
   my $path = shift->SUPER::_canon_path(shift);
   $path = "$path/" if $path and substr($path, -1, 1) ne '/';
   return $path;
+}
+
+=head2 PARSE
+
+=cut
+
+sub PARSE {
+  my ($class, $url) = @_;
+  my $uri = URI->new($url);
+
+  my $self = ref($class) ? $class : $class->ROOT;
+
+  my $name = ref($self);
+  #warn "$name: parsing '$uri'";
+
+  # choosing a branch: scheme/host/port can all be
+  # overridden at the deepest level, so we don't want to
+  # search based on those -- it has the potential to take
+  # too long.
+  #
+  # instead, start looking at the path.  if one of the
+  # branches matches, use it.  otherwise, start looking down
+  # each branch for an absolutely stated path.
+  # 
+  # XXX right now there is no way to give an absolutely
+  # stated path.
+  #
+  # XXX how do we handle path_args?
+
+  my @path = grep { length } split m!/+!, $uri->path;
+  
+  # XXX bogus
+  return $self unless (@path);
+
+  my $map = $class->_site->{map};
+  die "XXX WTF" unless %$map;
+
+  my $first = shift(@path);
+  #warn "looking for '$first'\n";
+  my $branch = $self->$first || die "XXX WTF 2";
+
+  if (@path and $path[0] =~ /^\d+$/) {
+    $branch->_args(shift @path);
+  }
+  
+  # XXX not handling scheme/host/port
+  return $branch->PARSE(join "/", @path);
 }
 
 =head1 AUTHOR

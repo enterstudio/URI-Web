@@ -33,6 +33,8 @@ use overload (
   fallback => 1,
 );
 
+sub PARENT { shift->__parent }
+
 sub SCHEME {
   my ($self, $opt) = @_;
   return $self->_lookup('scheme', $opt) || 'http';
