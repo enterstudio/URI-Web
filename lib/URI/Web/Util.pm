@@ -6,7 +6,7 @@ use warnings;
 use Package::Generator;
 use Params::Util qw(_STRING _HASH);
 use Sub::Exporter -setup => {
-  exports => [qw(_die _catpath handler class permissive)],
+  exports => [qw(_die _load_class _catpath handler class permissive)],
 };
 
 =head1 NAME
@@ -39,12 +39,17 @@ sub _catpath {
   return $str;
 }
 
-sub _loaded {
+sub _load_class {
   no strict 'refs';
 #  use Data::Dumper;
   my $class = shift;
 #  warn "$class :: " . Dumper \%{$class . '::'};
-  return keys %{$class . '::'};
+  unless (keys %{$class . '::'}) {
+    eval "require $class";
+    die $@ if $@;
+    eval { $class->isa($CLASS) } or _die("$class must be isa $CLASS");
+    die $@ if $@;
+  }
 }
 
 
@@ -58,21 +63,8 @@ sub handler ($) {
 
   $class = caller() . "::$class" unless $class =~ s/^\+//;
 
-  return sub {
-    unless (_loaded($class)) {
-      #warn "loading $class\n";
-      eval "require $class";
-      die $@ if $@;
-      eval { $class->isa($CLASS) } or _die("$class must be isa $CLASS");
-      die $@ if $@;
-    }
-    
-#    use Data::Dumper;
-#    warn "about to call $class->new with " . Dumper(\@_);
-    return $class->new({
-      (map {; "__$_" => $class->_site->{$_} } qw(scheme host port)),
-      %{+shift},
-    });
+  return {
+    class => $class,
   };
 }
 

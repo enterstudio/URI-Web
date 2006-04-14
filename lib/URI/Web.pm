@@ -14,8 +14,8 @@ use lib '/home/hdp/svk/export/trunk/lib';
 use Socket;
 use URI;
 use URI::Web::Leaf;
-use URI::Web::Util qw(_die);
-use Params::Util qw(_ARRAY _CALLABLE _STRING);
+use URI::Web::Util qw(_die _load_class);
+use Params::Util qw(_HASH _ARRAY _CALLABLE _STRING);
 use Data::OptList;
 use Sub::Install ();
 
@@ -68,10 +68,13 @@ sub setup_site {
   my ($class, $arg) = @_;
   $arg = { map => $arg } if _ARRAY($arg);
 
+  $arg->{branches} = {};
+
   $arg->{map} = Data::OptList::expand_opt_list(
     $arg->{map}, "$class site map",
   );
 
+  $class->_site($arg);
   $class->_setup_site_map($arg->{map});
 
   if ($arg->{permissive}) {
@@ -82,13 +85,11 @@ URI::Web::Permissive->import('-all');
 
     die $@ if $@;
   }
-
-  $class->_site($arg);
 }
 
 sub _setup_site_map {
   my ($class, $map) = @_;
-  my $code;
+
   while (my ($key, $val) = each %$map) {
     # this is ahead of the main switch because we want
     # handlers generated here to be treated the same as
@@ -97,29 +98,45 @@ sub _setup_site_map {
       $val = URI::Web::Util::handler(
         URI::Web::Util::class({ map => $val }),
       );
+    } elsif (not defined $val) {
+      $val = {
+        class => 'URI::Web::Leaf',
+      };
     }
 
-    if (not defined $val) {
-      $code = sub { shift->_child(
-        'URI::Web::Leaf', 
+    unless (_HASH($val)) {
+      if (_CALLABLE($val)) {
+        my $code = $val;
+        $val = { handler => $code };
+      } else {
+        _die "unknown $class site map type: $val";
+      }
+    }
+
+    $val->{class} || $val->{handler} ||
+      _die("value '$key' requires one of 'class' or 'handler' is required");
+
+    $val->{handler} ||= sub {
+      _load_class($val->{class});
+      shift->_child(
+        $val->{class},
         __path => $key,
-        @_
-      ) };
-    } elsif (_CALLABLE($val)) {
-      $code = sub { $val->({
-        __parent => shift,
-        __path   => $key,
-        __args   => shift,
-      }) };
-    } else {
-      _die "unknown $class site map type: $val";
-    }
+        __args => shift,
+        map {; "__$_" => $val->{class}->_site->{$_} }
+          qw(scheme host port),
+      );
+    };
 
+    # allow leading / on paths
+    my $meth = $key;
+    $meth =~ s!^/+!!;
     Sub::Install::install_sub({
       into => $class,
-      code => $code,
-      as   => $key,
+      code => $val->{handler},
+      as   => $meth,
     });
+
+    $class->_site->{branches}->{$meth} = $val;
   }
 }
 
@@ -156,7 +173,7 @@ sub _canon_path {
 
 sub PARSE {
   my ($class, $url) = @_;
-  my $uri = URI->new($url);
+  my $uri = URI->new($url)->canonical;
 
   my $self = ref($class) ? $class : $class->ROOT;
 
@@ -172,29 +189,46 @@ sub PARSE {
   # branches matches, use it.  otherwise, start looking down
   # each branch for an absolutely stated path.
   # 
-  # XXX right now there is no way to give an absolutely
-  # stated path.
-  #
   # XXX how do we handle path_args?
 
-  my @path = grep { length } split m!/+!, $uri->path;
+  my @path = split m!/+!, $uri->path;
+  shift @path until !@path or length $path[0];
   
-  # XXX bogus
+  # XXX bogus, should check host/scheme/port
   return $self unless (@path);
 
   my $map = $class->_site->{map};
   die "XXX WTF" unless %$map;
 
-  my $first = shift(@path);
-  #warn "looking for '$first'\n";
-  my $branch = $self->$first || die "XXX WTF 2";
+  # 
 
+  my $first = shift(@path);
+  my $found;
+  warn "looking for '$first'\n";
+
+  my $match = $self->can($first);
+  if ($match) {
+    $found = $self->$match;
+  } else {
+    my @q = map {
+      [ $_ => $class->_site->{branches}->{$_} ]
+    } keys %{ $class->_site->{branches} };
+    while (@q and not $found) {
+      my ($name, $mapent) = @{ shift @q };
+      use Data::Dumper;
+      warn Dumper({ $name => $mapent });
+    }
+  }
+
+  die "BLAH" unless $found;
+
+  # XXX totally bogus
   if (@path and $path[0] =~ /^\d+$/) {
-    $branch->_args(shift @path);
+    $found->_args(shift @path);
   }
   
   # XXX not handling scheme/host/port
-  return $branch->PARSE(join "/", @path);
+  return $found->PARSE(join "/", @path);
 }
 
 =head1 AUTHOR
