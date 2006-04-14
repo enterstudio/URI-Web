@@ -202,7 +202,7 @@ sub PARSE {
 
   my $first = shift(@path);
   my $found;
-  warn "looking for '$first'\n";
+  #warn "looking for '$first'\n";
 
   my $match = $self->can($first);
   if ($match) {
@@ -213,12 +213,13 @@ sub PARSE {
     } keys %{ $class->_site->{branches} };
     while (@q and not $found) {
       my ($name, $mapent) = @{ shift @q };
-      use Data::Dumper;
-      warn Dumper({ $name => $mapent });
+      #use Data::Dumper;
+      #warn Dumper({ $name => $mapent });
     }
   }
 
-  die "BLAH" unless $found;
+  # XXX TODO
+  return unless $found;
 
   # XXX totally bogus
   if (@path and $path[0] =~ /^\d+$/) {
