@@ -118,8 +118,10 @@ sub new {
 sub _env {
   my ($self, $name) = @_;
   my $var = sprintf(
-    "SITE_%s_%s_%s",
-    $self->_canonical_host, $self->_canonical_path, $name,
+    "SITE_%s_%s",
+    ($self->_site->{env} ||
+       join("_", $self->_canonical_host, $self->_canonical_path)
+     ), $name,
   );
   $var =~ tr{./}{__};
   $var =~ s/_+/_/g;

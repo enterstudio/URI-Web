@@ -11,6 +11,10 @@ use URI::Web -base => {
     easy => permissive,
     elsewhere => \"/else/where",
     overthere => \"/over/there.html",
+    legacy    => handler class {
+      path => "/old",
+      env  => "test_com_legacy",
+    },
   ],
   path_args => [ 'id' ],
 };

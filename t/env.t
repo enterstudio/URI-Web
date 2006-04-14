@@ -11,6 +11,12 @@ my $root = URI::Web::Test->ROOT;
 
 my $subber = $root->sub->subber;
 
+my $old = $root->sub->legacy;
+is("$old", "http://subtest.com/old/");
+
+$ENV{SITE_test_com_legacy_HOST} = "test.test.com";
+is("$old", "http://test.test.com/old/");
+
 $ENV{SITE_subtest_com_sub_subber_PATH} = 'mayo';
 
 is("$subber", "http://subtest.com/sub/mayo/");
@@ -44,3 +50,4 @@ TODO: {
   local $TODO = "this does not yet 'just work' with the port setting, above";
   is("$sub", "https://try.com/hoagie/5/");
 }
+
