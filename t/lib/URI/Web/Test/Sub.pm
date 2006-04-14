@@ -10,6 +10,7 @@ use URI::Web -base => {
     ],
     easy => permissive,
     elsewhere => \"/else/where",
+    overthere => \"/over/there.html",
   ],
   path_args => [ 'id' ],
 };

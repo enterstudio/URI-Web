@@ -21,9 +21,8 @@ BEGIN {
   __PACKAGE__->mk_ro_accessors(
     qw(__scheme __host __port),
   );
-  __PACKAGE__->mk_classdata(
-    qw(__path_args_optlist),
-  );
+  __PACKAGE__->mk_classdata('_site');
+  __PACKAGE__->mk_classdata('__path_args_optlist');
 }
 
 use URI;

@@ -11,17 +11,23 @@ sub _canon_path {
   return $path;
 }
 
-# leaves should never be handling variables (really?)
-# XXX this seems a little weird, but we can work around it if we really need to
-my $EMPTY = {};
-sub _site { $EMPTY }; 
-
 =head1 NAME
 
 URI::Web::Leaf
 
 =head1 DESCRIPTION
 
+=head1 METHODS
+
+=head2 setup_site
+
 =cut
+
+sub setup_site {
+  my $class = shift;
+  $class->_site(@_);
+}
+
+__PACKAGE__->setup_site({});
 
 1;

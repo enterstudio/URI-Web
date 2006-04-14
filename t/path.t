@@ -38,19 +38,25 @@ is($subber, 'http://subtest.com/sub/17/subber/', "subber (unchanged)");
 
 is($subbest->WITH({ id => 3 }), "http://subtest.com/sub/3/subber/subbest",
    "subbest uri (with)");
-is($subbest, 'http://subtest.com/sub/17/subber/subbest', 'subbest (unchanged)');
+is($subbest, 'http://subtest.com/sub/17/subber/subbest',
+   'subbest (unchanged)');
 
 my $page5 = $root->QUERY({ page => 5 });
 is($page5, "http://test.com/?page=5", 'root query');
-is($page5->QUERY_PLUS({ color => 'red' }), "http://test.com/?page=5&color=red", 'root query plus');
+is($page5->QUERY_PLUS({ color => 'red' }), "http://test.com/?page=5&color=red",
+   'root query plus');
 
 is($root->WITH({ PORT => 8080 }), "http://test.com:8080/", "WITH PORT");
 is($sub->WITH({ HOST => 'try.com' }), "http://try.com/sub/17/", "WITH HOST");
-is($sub->WITH({ SCHEME => 'https' }), "https://subtest.com/sub/17/", "WITH SCHEME (branch)");
+is($sub->WITH({ SCHEME => 'https' }), "https://subtest.com/sub/17/",
+   "WITH SCHEME (branch)");
 is($subbest->WITH({ SCHEME => 'https' }),
    "https://subtest.com/sub/17/subber/subbest", "WITH SCHEME (leaf)");
 
 is($root->sub->elsewhere, "http://subtest.com/else/where/", "absolute path");
+
+is($root->sub->overthere, "http://subtest.com/over/there.html",
+   "absolute leaf path");
 
 my $templ = <<'';
 [%- root.QUERY(color = 'red') -%]

@@ -3,16 +3,16 @@ package URI::Web;
 use warnings;
 use strict;
 
-use base qw(URI::Web::Node
-            Class::Data::Inheritable
-          );
-
-__PACKAGE__->mk_classdata('_site');
+use base qw(URI::Web::Node);
 
 use Socket;
 use URI;
 use URI::Web::Leaf;
-use URI::Web::Util qw(_die _load_class);
+use URI::Web::Util (
+  qw(_die _load_class),
+  handler => { -as => '_handler' },
+  class   => { -as => '_class' },
+);
 use Params::Util qw(_SCALAR _HASH _ARRAY _CALLABLE _STRING);
 use Data::OptList;
 use Sub::Install ();
@@ -90,16 +90,24 @@ sub _setup_site_map {
 
   while (my ($key, $val) = each %$map) {
     if (_SCALAR($val)) {
-      $val = URI::Web::Util::handler(
-        URI::Web::Util::class({
+
+      if ($$val =~ /\./) {
+        $val = _handler _class {(
+          _isa  => 'URI::Web::Leaf',
+          _base => $class,
+          path  => $$val,
+        )};
+
+      } else {
+        $val = _handler _class {(
           path       => $$val,
           permissive => 1,
-        }),
-      );
+        )};
+      }
+
     } elsif (_ARRAY($val)) {
-      $val = URI::Web::Util::handler(
-        URI::Web::Util::class({ map => $val }),
-      );
+      $val = _handler _class { map => $val };
+
     } elsif (not defined $val) {
       $val = {
         class => 'URI::Web::Leaf',

@@ -77,11 +77,11 @@ sub class ($) {
   my $caller = _STRING(shift) || caller;
 
   my $class = Package::Generator->new_package({
-    base => $caller,
-    isa  => $CLASS,
+    base => delete $site->{_base} || $caller,
+    isa  => delete $site->{_isa}  || $CLASS,
   });
 
-  $class->setup_site($site);
+  $class->setup_site($site) if $class->can("setup_site");
   return "+$class";
 }
 
