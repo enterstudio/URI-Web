@@ -36,8 +36,11 @@ $ENV{SITE_test_com_PORT} = 8080;
 is("$root", "http://test.com:8080/");
 is("$sub", "http://try.com:8080/hoagie/5/");
 
+$ENV{SITE_subtest_com_sub_SCHEME} = 'https';
+
+is("$sub", "https://try.com:8080/hoagie/5/");
+
 TODO: {
   local $TODO = "this does not yet 'just work' with the port setting, above";
-  $ENV{SITE_test_com_sub_SCHEME} = 'https';
   is("$sub", "https://try.com/hoagie/5/");
 }
