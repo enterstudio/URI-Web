@@ -63,10 +63,6 @@ our $VERSION = '0.01';
 
 =cut
 
-my %DEFAULT = (
-  scheme => 'http',
-);
-
 sub setup_site {
   my ($class, $arg) = @_;
   $arg = { map => $arg } if _ARRAY($arg);
@@ -74,8 +70,6 @@ sub setup_site {
   $arg->{map} = Data::OptList::expand_opt_list(
     $arg->{map}, "$class site map",
   );
-
-  $arg->{scheme} ||= $DEFAULT{scheme};
 
   $class->_setup_site_map($arg->{map});
 

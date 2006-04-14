@@ -35,7 +35,7 @@ use overload (
 
 sub SCHEME {
   my ($self, $opt) = @_;
-  return $self->_lookup('scheme', $opt);
+  return $self->_lookup('scheme', $opt) || 'http';
 }
 
 sub HOST {
