@@ -299,4 +299,6 @@ scheme.
 Return a URI object.  Since URI::Web::Nodes stringify to
 this method, you will only rarely need to call it.
 
+=head2 PARENT
+
 =cut
