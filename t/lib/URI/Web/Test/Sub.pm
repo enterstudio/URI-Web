@@ -9,6 +9,7 @@ use URI::Web -base => {
       qw(subbest),
     ],
     easy => permissive,
+    elsewhere => \"/else/where",
   ],
   path_args => [ 'id' ],
 };

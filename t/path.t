@@ -50,6 +50,8 @@ is($sub->WITH({ SCHEME => 'https' }), "https://subtest.com/sub/17/", "WITH SCHEM
 is($subbest->WITH({ SCHEME => 'https' }),
    "https://subtest.com/sub/17/subber/subbest", "WITH SCHEME (leaf)");
 
+is($root->sub->elsewhere, "http://subtest.com/else/where/", "absolute path");
+
 my $templ = <<'';
 [%- root.QUERY(color = 'red') -%]
 

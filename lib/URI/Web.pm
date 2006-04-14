@@ -13,7 +13,7 @@ use Socket;
 use URI;
 use URI::Web::Leaf;
 use URI::Web::Util qw(_die _load_class);
-use Params::Util qw(_HASH _ARRAY _CALLABLE _STRING);
+use Params::Util qw(_SCALAR _HASH _ARRAY _CALLABLE _STRING);
 use Data::OptList;
 use Sub::Install ();
 
@@ -89,10 +89,14 @@ sub _setup_site_map {
   my ($class, $map) = @_;
 
   while (my ($key, $val) = each %$map) {
-    # this is ahead of the main switch because we want
-    # handlers generated here to be treated the same as
-    # handlers that were originally passed in
-    if (_ARRAY($val)) {
+    if (_SCALAR($val)) {
+      $val = URI::Web::Util::handler(
+        URI::Web::Util::class({
+          path       => $$val,
+          permissive => 1,
+        }),
+      );
+    } elsif (_ARRAY($val)) {
       $val = URI::Web::Util::handler(
         URI::Web::Util::class({ map => $val }),
       );
@@ -118,7 +122,7 @@ sub _setup_site_map {
       _load_class($val->{class});
       shift->_child(
         $val->{class},
-        __path => $key,
+        __path => $val->{class}->_site->{path} || $key,
         __args => shift,
         map {; "__$_" => $val->{class}->_site->{$_} }
           qw(scheme host port),
@@ -153,6 +157,8 @@ sub ROOT {
 sub _child {
   my $self = shift;
   my $kidclass = shift;
+  #use Data::Dumper;
+  #warn "creating new $kidclass with " . Dumper({ __parent => $self, @_ });
   return $kidclass->new({
     __parent => $self,
     @_,
