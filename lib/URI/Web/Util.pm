@@ -6,7 +6,9 @@ use warnings;
 use Package::Generator;
 use Params::Util qw(_STRING _HASH);
 use Sub::Exporter -setup => {
-  exports => [qw(_die _load_class _catpath handler class permissive)],
+  exports => [qw(_die _load_class _catpath handler class permissive
+                 file_handler
+               )],
 };
 
 =head1 NAME
@@ -83,6 +85,40 @@ sub class ($) {
 
   $class->setup_site($site) if $class->can("setup_site");
   return "+$class";
+}
+
+=head2 file_handler
+
+Return a handler which accepts filenames and returns leaves.
+
+For example, to make a simple static html path handler, you
+might use:
+
+  # in map
+  file_handler('html'),
+
+  # in code, later
+  $class->ROOT->html("foo.html")
+  # http://somehost/html/foo.html
+
+=cut
+
+sub file_handler {
+  my ($path) = @_;
+  return $path => sub {
+    my $self = shift;
+    if (@_) {
+      return $self->_child(
+        'URI::Web::Leaf',
+        __path => _catpath($path, shift),
+      );
+    } else {
+      return $self->WITH({
+        PARENT => $self,
+        PATH   => $path,
+      });
+    } 
+  };
 }
 
 =head2 permissive

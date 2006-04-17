@@ -221,7 +221,7 @@ sub WITH {
     $clone->__args->{$key} = $val;
   }
 
-  for my $key (qw(SCHEME HOST PORT)) {
+  for my $key (qw(SCHEME HOST PORT PATH PARENT)) {
     my $val = delete $arg->{$key};
     next unless defined $val;
     $clone ||= $self->_clone;

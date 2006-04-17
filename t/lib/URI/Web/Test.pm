@@ -10,6 +10,7 @@ use URI::Web -base => {
     easy      => handler 'Easy',
     easier    => handler class { permissive => 1 },
     easiest   => permissive,
+    file_handler('html'),
   ],
 };
 
