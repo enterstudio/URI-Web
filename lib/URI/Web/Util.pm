@@ -104,13 +104,15 @@ might use:
 =cut
 
 sub file_handler {
-  my ($path) = @_;
+  my ($path, $opt) = @_;
+  $opt ||= {};
+  $opt->{path} ||= $path;
   return $path => sub {
     my $self = shift;
     if (@_) {
       return $self->_child(
         'URI::Web::Leaf',
-        __path => _catpath($path, shift),
+        __path => _catpath($opt->{path}, shift),
       );
     } else {
       return $self->WITH({
