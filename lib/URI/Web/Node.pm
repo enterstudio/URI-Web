@@ -200,7 +200,11 @@ sub URI {
   return $uri->canonical;
 }
 
-sub _clone { Storable::dclone(shift) }
+sub _clone {
+  my $clone = Storable::dclone(shift);
+  delete $clone->{$_} for grep /^_canonical/, keys %$clone;
+  return $clone;
+}
 
 sub WITH {
   my ($self, $arg) = @_;
