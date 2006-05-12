@@ -15,6 +15,7 @@ requires 'Params::Util'             => 0;
 requires 'Package::Generator'       => 0;
 requires 'Sub::Exporter'            => 0;
 requires 'URI'                      => 0;
+requires 'CGI::Expand'              => 0;
 
 auto_install;
 WriteAll;

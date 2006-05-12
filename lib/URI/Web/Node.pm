@@ -13,6 +13,7 @@ use Params::Util qw(_ARRAY);
 use Sub::Install ();
 use Storable ();
 use Scalar::Util ();
+use CGI::Expand ();
 
 BEGIN {
   __PACKAGE__->mk_accessors(
@@ -215,6 +216,7 @@ sub WITH {
 
   if (my $query = delete $arg->{__query}) {
     $clone = $self->_clone;
+    $query = CGI::Expand->collapse_hash($query);
     $clone->__query($query);
   }
 
