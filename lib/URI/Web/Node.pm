@@ -216,7 +216,13 @@ sub WITH {
 
   if (my $query = delete $arg->{__query}) {
     $clone = $self->_clone;
+    my $literal = delete $query->{_LITERAL};
     $query = CGI::Expand->collapse_hash($query);
+    if ($literal) {
+      # this only works because $query has already been
+      # flattened by collapse_hash
+      $query->{$_} = $literal->{$_} for keys %$literal;
+    }
     $clone->__query($query);
   }
 
