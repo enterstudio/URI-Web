@@ -181,7 +181,7 @@ sub __path_args {
   my $class = shift;
   return {} unless $class->_site->{path_args};
   $class->__path_args_optlist || $class->__path_args_optlist(
-    Data::OptList::expand_opt_list(
+    Data::OptList::mkopt_hash(
       $class->_site->{path_args}, "site object path args",
     ),
   );

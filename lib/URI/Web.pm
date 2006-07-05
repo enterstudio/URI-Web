@@ -22,14 +22,14 @@ use Sub::Exporter -setup => {
 };
 
 sub _build_base {
-  my ($value, $name, $cfg, $args, $class, $into) = @_;
+  my ($value, $arg) = @_;
 
   {
     no strict 'refs';
-    push @{$into . "::ISA"}, $class;
+    push @{$arg->{into} . "::ISA"}, $arg->{class};
   }
 
-  $into->setup_site($value);
+  $arg->{into}->setup_site($value);
 
   return 1;
 }
@@ -68,7 +68,7 @@ sub setup_site {
 
   $arg->{branches} = {};
 
-  $arg->{map} = Data::OptList::expand_opt_list(
+  $arg->{map} = Data::OptList::mkopt_hash(
     $arg->{map}, "$class site map",
   );
 
