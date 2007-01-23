@@ -46,6 +46,8 @@ sub HOST {
   return $self->_lookup('host', $opt);
 }
 
+# cache the results of getservbyname for speed -- hdp, 2007-01-23
+my %_servbyname;
 sub PORT {
   my ($self, $opt) = @_;
   #my $str = $self->PATH;
@@ -53,10 +55,13 @@ sub PORT {
   if ($self->__scheme and not $opt->{no_default_port}) {
     #warn "$str: (possibly) looking up parental port, no default\n";
     return $self->_lookup('port', { %$opt, no_default_port => 1 })
-      || scalar getservbyname($self->__scheme, 'tcp');
+      || ($_servbyname{$self->__scheme} ||=
+        getservbyname($self->__scheme, 'tcp'));
   }
   #warn "$str: looking up parental port, possibly with default allowed\n";
-  return $self->_lookup('port', $opt) || scalar getservbyname($self->SCHEME, 'tcp'); 
+  return $self->_lookup('port', $opt) || (
+    $_servbyname{$self->SCHEME} ||= getservbyname($self->SCHEME, 'tcp')
+  ); 
 }
 
 sub _lookup {
