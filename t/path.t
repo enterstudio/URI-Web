@@ -15,6 +15,24 @@ isa_ok($root, 'URI::Web');
 isa_ok($root, 'URI::Web::Node');
 is("$root", 'http://test.com/', 'root uri');
 
+for my $test_spec (
+  [ { }, '', 'no args' ],
+  [ { foo => 1 }, '/1', 'foo' ],
+  [ { bar => 2 }, '/2', 'bar' ],
+  [ { foo => 1, bar => 2 }, '/1/2', 'foo+bar' ],
+  [ { baz => 3 }, '/baz/3', 'baz' ],
+  [ { foo => 1, bar => 2, baz => 3 }, '/1/2/baz/3', 'foo+bar+baz' ],
+  [ { baz => 3, quux => 4 }, '/baz/3/quux=4', 'baz+quux' ],
+  [ { foo => 1, bar => 2, baz => 3, quux => 4 },
+    '/1/2/baz/3/quux=4', 'foo+bar+baz+quux',
+  ],
+) {
+  my ($args, $path, $label) = @$test_spec;
+  $path = "/$path" unless $path =~ m{^/};
+  $path .= "/" unless $path =~ m{/$};
+  is $root->args($args), "http://test.com/args$path", $label;
+}
+
 my $sub = $root->sub;
 isa_ok($sub, 'URI::Web');
 is("$sub", "http://subtest.com/sub/", "sub uri (no args)");
@@ -43,8 +61,11 @@ is($subbest, 'http://subtest.com/sub/17/subber/subbest',
 
 my $page5 = $root->QUERY({ page => 5 });
 is($page5, "http://test.com/?page=5", 'root query');
-is($page5->QUERY_PLUS({ color => 'red' }), "http://test.com/?page=5&color=red",
-   'root query plus');
+is_deeply(
+  { URI->new($page5->QUERY_PLUS({ color => 'red' }))->query_form },
+  { page => 5, color => 'red' },
+  'root query plus',
+);
 
 is($root->WITH({ PORT => 8080 }), "http://test.com:8080/", "WITH PORT");
 is($sub->WITH({ HOST => 'try.com' }), "http://try.com/sub/17/", "WITH HOST");

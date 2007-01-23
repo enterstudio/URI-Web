@@ -14,6 +14,7 @@ use Sub::Install ();
 use Storable ();
 use Scalar::Util ();
 use CGI::Expand ();
+use Data::OptList ();
 
 BEGIN {
   __PACKAGE__->mk_accessors(
@@ -141,6 +142,8 @@ sub _canonical_host {
   $self->{_canonical_host} ||= $self->HOST({ canonical => 1 });
 }
 
+sub __path_arg_default { defined($_[0]) ? $_[0] : '' }
+
 sub PATH {
   my ($self, $opt) = @_;
   $opt ||= {};
@@ -150,14 +153,12 @@ sub PATH {
       my $obj = shift;
       my $pa   = $obj->__path_args;
       my $args = $obj->_args;
-      # XXX check env here:
       my @path = $obj->_env('PATH') || $obj->__path;
-      for my $argname (keys %$args) {
-        next unless exists $pa->{$argname};
-        my $code = $pa->{$argname} || sub { 
-          defined($_[0]) ? $_[0] : ''
-        };
-        push @path, $code->($args->{$argname});
+      for my $path_arg (@$pa) {
+        my ($name, $code) = @$path_arg;
+        next unless exists $args->{$name};
+        $code ||= \&__path_arg_default;
+        push @path, $code->($args->{$name});
       }
       return @path ? _catpath(@path) : '';
     },
@@ -169,8 +170,8 @@ sub _args {
   if (@_) {
     my $args = shift;
     my $pa   = $self->__path_args;
-    if (Scalar::Util::blessed($args) || !ref($args) and keys %$pa == 1) {
-      $args = { keys %$pa => $args };
+    if (Scalar::Util::blessed($args) || !ref($args) and @$pa == 1) {
+      $args = { $pa->[0][0] => $args };
     }
     $self->__args($args);
   }
@@ -179,9 +180,9 @@ sub _args {
 
 sub __path_args {
   my $class = shift;
-  return {} unless $class->_site->{path_args};
+  return [] unless $class->_site->{path_args};
   $class->__path_args_optlist || $class->__path_args_optlist(
-    Data::OptList::mkopt_hash(
+    Data::OptList::mkopt(
       $class->_site->{path_args}, "site object path args",
     ),
   );
@@ -201,16 +202,24 @@ sub URI {
   return $uri->canonical;
 }
 
+# _clone does a shallow copy followed by a second-level shallow copy of certain
+# attributes; we do this instead of dclone because it is faster and simpler to
+# only copy the things we are actually going to change
 sub _clone {
-  my $clone = Storable::dclone(shift);
+  my $self = shift;
+  my $clone = bless {%$self} => ref($self);
+  # XXX there's no test that points out why this is necessary -- hdp,
+  # 2007-01-23
   delete $clone->{$_} for grep /^_canonical/, keys %$clone;
+  for my $hkey (qw(__args __query)) {
+    next unless $clone->{$hkey};
+    $clone->{$hkey} = { %{ $clone->{$hkey} } };
+  }
   return $clone;
 }
 
 sub WITH {
   my ($self, $arg) = @_;
-  #warn "getting path_args for " . overload::StrVal($self);
-  my $pa = $self->__path_args;
 
   my $clone;
 
@@ -226,11 +235,12 @@ sub WITH {
     $clone->__query($query);
   }
 
-  for my $key (keys %$arg) {
-    next unless exists $pa->{$key};
-    my $val = delete $arg->{$key};
+  for my $path_arg (@{$self->__path_args}) {
+    my ($name) = @$path_arg;
+    next unless exists $arg->{$name};
+    my $val = delete $arg->{$name};
     $clone ||= $self->_clone;
-    $clone->__args->{$key} = $val;
+    $clone->__args->{$name} = $val;
   }
 
   for my $key (qw(SCHEME HOST PORT PATH PARENT)) {
