@@ -13,7 +13,7 @@ use URI::Web::Util (
   handler => { -as => '_handler' },
   class   => { -as => '_class' },
 );
-use Params::Util qw(_SCALAR _HASH _ARRAY _CALLABLE _STRING);
+use Params::Util qw(_SCALAR _HASH _ARRAY _CODELIKE _STRING);
 use Data::OptList;
 use Sub::Install ();
 
@@ -115,7 +115,7 @@ sub _setup_site_map {
     }
 
     unless (_HASH($val)) {
-      if (_CALLABLE($val)) {
+      if (_CODELIKE($val)) {
         my $code = $val;
         $val = { handler => $code };
       } else {
