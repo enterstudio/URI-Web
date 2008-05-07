@@ -6,6 +6,7 @@ use warnings;
 use lib 't/lib';
 use Test::More 'no_plan';
 use ok 'URI::Web::Test';
+use Data::Dumper;
 
 my $root = URI::Web::Test->ROOT;
 
@@ -28,3 +29,9 @@ is_query $root->QUERY({ foo => { bar => 1, baz => [ 2, 3 ] }}),
 is_query $root->QUERY({ foo => { bar => 1 }, _LITERAL => { 'foo.baz' => 2 } }),
   { 'foo.bar' => 1, 'foo.baz' => 2 },
   "literal with nesting";
+
+my $test = $root->QUERY({ a => [1] });
+is_query $test, { 'a.0' => 1 }, "flattened array";
+$test = $test->QUERY_PLUS({ b => 2 });
+is_query $test, { 'a.0' => 1, b => 2 }, "QUERY_PLUS did not munge a.0"
+  or diag Dumper({ $test->URI->query_form });

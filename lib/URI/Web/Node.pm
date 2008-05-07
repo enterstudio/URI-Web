@@ -276,7 +276,7 @@ sub QUERY {
 sub QUERY_PLUS {
   my ($self, $arg) = @_;
   return $self->WITH({ __query => {
-    %{$self->__query}, %$arg
+    %{CGI::Expand->expand_hash($self->__query)}, %$arg,
   }});
 }
 
