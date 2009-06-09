@@ -196,11 +196,17 @@ sub __path_args {
 sub URI {
   my ($self) = @_;
 
-  my $uri = URI->new(sprintf(
-    "%s://%s:%s/%s",
-    $self->SCHEME, $self->HOST, $self->PORT,
-    $self->_canon_path($self->PATH),
-  ));
+  # the object may not have one or more of these. shut up warnings about it
+  # which URI.pm will handle anyway. -- cmn, 2009-06-09
+  my $uri;
+  {
+    no warnings 'uninitialized';
+    $uri = URI->new(sprintf(
+      "%s://%s:%s/%s",
+      $self->SCHEME, $self->HOST, $self->PORT,
+      $self->_canon_path($self->PATH),
+    ));
+  }
 
   $uri->query_form($self->__query) if %{$self->__query};
 
