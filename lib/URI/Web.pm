@@ -40,11 +40,11 @@ URI::Web - site map
 
 =head1 VERSION
 
-Version 0.020001
+Version 0.020002
 
 =cut
 
-our $VERSION = '0.020001';
+our $VERSION = '0.020002';
 
 =head1 SYNOPSIS
 
